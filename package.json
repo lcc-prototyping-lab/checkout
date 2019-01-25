@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "faker": "^4.1.0",
     "fs-extra": "^7.0.1",
     "jsonfile": "^5.0.0",
     "mocha": "^5.2.0",
