@@ -3,7 +3,20 @@ const knex = require( 'knex' );
 
 const { constructTarget } = require('./utils.js');
 
-module.exports = knex( {
-  client: 'pg',
-  connection: constructTarget()
-});
+let config;
+
+if (process.env.TESTING) {
+  config = {
+    client: 'sqlite3',
+    connection: {
+      filename: "./test/testing.sqlite"
+    }
+  };
+} else {
+  config = {
+    client: 'pg',
+    connection: constructTarget()
+  };
+}
+
+module.exports = knex(config);

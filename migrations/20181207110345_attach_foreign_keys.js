@@ -1,5 +1,9 @@
 
 exports.up = function(knex, Promise) {
+  if (process.env.TESTING) {
+    return Promise.resolve(true);
+  }
+
   return Promise.all([
     knex.schema.table('actions', table => {
       table.foreign('item_id').references('items.id');
@@ -28,6 +32,10 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
+  if (process.env.TESTING) {
+    return Promise.resolve(true);
+  }
+
   return Promise.all([
     knex.schema.table('actions', table => {
       table.dropForeign('item_id');
