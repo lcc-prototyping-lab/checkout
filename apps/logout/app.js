@@ -12,7 +12,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', auth.isLoggedIn, (req, res) => {
+app.get('/', (req, res) => {
   req.controller.getRoot(req, res);
 });
 

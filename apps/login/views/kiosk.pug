@@ -1,0 +1,24 @@
+extends ../../../src/views/base.pug
+
+block prepend title
+	- title = "Login"
+
+block navbar
+
+block header
+
+block footer
+	
+block flash
+
+block append css
+	link(rel="stylesheet", type="text/css", href="/css/login.css")
+
+block contents
+	.col-12.text-center
+		form( method="post", action="/login" ).form-signin
+			h1.mb-0 Checkout
+			h5.mb-3.text-danger Kiosk Mode
+			+messageBlock('dark','white','This computer is in kiosk mode, you cannot access this feature.')
+			a(href="/logout").btn.btn-sm.btn-outline-danger.btn-block Exit Kiosk Mode
+			
