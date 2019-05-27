@@ -27,7 +27,6 @@ jQuery( document ).ready( function() {
 	jQuery( document ).delegate( '#modules .card-header', 'click', handlePanelClick );
 	jQuery( document ).delegate( '#modules .buttons button', 'click', handleItemButtons );
 	jQuery( document ).delegate( '#issue .flash .override', 'click', handleOverride );
-	jQuery( document ).delegate( '#modules .glyphicon-print', 'click', handlePrintButton );
 	jQuery( document ).delegate( '#results .list-group-item', 'click', handleResultClick );
 	jQuery( '#mode .nav-link' ).on( 'shown.bs.tab', function( a ) { focus(); } );
 } );
@@ -35,7 +34,7 @@ jQuery( document ).ready( function() {
 
 
 function searchTimer() {
-	search( jQuery( '#find input' ).val(), function( data ) {
+	API.search( jQuery( '#find input' ).val(), function( data ) {
 		empty();
 
 		var last_item;
@@ -71,7 +70,7 @@ function updateCurrent() {
 function select( type, barcode ) {
 	switch ( type ) {
 		case 'user':
-			getUser( barcode, function( data ) {
+			API.getUser( barcode, function( data ) {
 				if ( data.html ) {
 					addModule( data );
 					focus();
@@ -82,9 +81,9 @@ function select( type, barcode ) {
 			break;
 		case 'item':
 			if ( current && current.type == 'user' ) {
-				issue( barcode, current.barcode, false, handleItemIssue );
+				API.issue( barcode, current.barcode, false, handleItemIssue );
 			} else {
-				getItem( barcode, function( data ) {
+				API.getItem( barcode, function( data ) {
 					if ( data.html ) {
 						addModule( data );
 					}
@@ -125,7 +124,7 @@ function addModule( data ) {
 	// Trim the list
 	jQuery( '#modules' ).children().slice( 10 ).remove();
 
-	// Remove exi
+	// Remove existing
 	jQuery( '#modules [data-barcode="' + data.barcode + '"]' ).remove();
 
 	if ( data.type == 'user' ) {
@@ -169,69 +168,6 @@ function addResult( result, type ) {
 	html += '</small></li>';
 	if ( result.disable ) html = jQuery( html ).addClass( 'disabled' );
 	jQuery( '#results #' + type + 's .list-group' ).append( html );
-}
-
-function issue( item, user, override, cb ) {
-	var query = '';
-	last_item = {
-		item: item,
-		user: user
-	};
-	if ( override ) query += '?override=true';
-	jQuery.post( '/api/issue/' + item + '/' + user + query, function( data, status ) {
-		cb( data );
-	} );
-}
-function returnItem( item, cb ) {
-	jQuery.post( '/api/return/' + item, function( data, status ) {
-		cb( data );
-	} );
-}
-function broken( item, cb ) {
-	jQuery.post( '/api/broken/' + item, function( data, status ) {
-		cb( data );
-	} );
-}
-function lost( item, cb ) {
-	jQuery.post( '/api/lost/' + item, function( data, status ) {
-		cb( data );
-	} );
-}
-function label( item, cb ) {
-	jQuery.post( '/api/label/' + item, function( data, status ) {
-		cb( data );
-	} );
-}
-function audit( item, location, override, cb ) {
-	jQuery.post( '/api/audit/' + item, { location: location, override: override }, function( data, status ) {
-		cb( data );
-	} );
-}
-function newUser( name, barcode, email, course, year, cb ) {
-	jQuery.post( '/api/new-user/', {
-		name: name,
-		barcode: barcode,
-		email: email,
-		course: course,
-		year: year
-	}, function( data, status ) {
-		cb( data );
-	} );
-}
-function search( barcode, cb ) { barcode ? apiGET( 'search', barcode, cb ) : null; }
-function getItem( barcode, cb ) { apiGET( 'item', barcode, cb ); }
-function getUser( barcode, cb ) { apiGET( 'user', barcode, cb ); }
-function identify( barcode, cb ) { apiGET( 'identify', barcode, cb ); }
-function apiGET( method, barcode, cb ) {
-	jQuery.get( '/api/' + method + '/' + barcode, function( data, status ) {
-		cb( data );
-	} );
-}
-function getHistory() {
-	jQuery.get( '/api/history', function( data, status ) {
-    if ( data.actions )
-  		jQuery( '#history .items' ).html( data.actions );
-	} );
 }
 
 function empty( clear ) {
@@ -297,7 +233,7 @@ function handleIssueSubmit( e ) {
 	}
 	var term = jQuery( '#find input' ).val();
 
-	identify( term, function( data ) {
+	API.identify( term, function( data ) {
 		if ( data.kind == 'unknown' ) {
 			flash( { status: 'warning', message: 'Unknown barcode', barcode: term } );
 		} else {
@@ -313,7 +249,7 @@ function handleReturnSubmit( e ) {
 	var term = jQuery( '#return input' ).val();
 	jQuery( '#return input' ).val('');
 
-	returnItem( term, function( data ) {
+	API.returnItem( term, function( data ) {
 		if ( data ) {
 			flash( data );
 		} else {
@@ -340,7 +276,7 @@ function focus() {
 			jQuery( '#new-user input[name="barcode"]' ).focus();
 			break;
 		case 'history':
-			getHistory();
+			API.getHistory();
 			break;
 	}
 }
@@ -352,19 +288,19 @@ function handleItemButtons() {
 
 	switch ( jQuery( this ).html() ) {
 		case 'Return':
-			returnItem( barcode, function( data ) {
+			API.returnItem( barcode, function( data ) {
 				flash( data );
 				select( 'item', data.barcode );
 			} );
 			break;
 		case 'Broken':
-			broken( barcode, function( data ) {
+			API.broken( barcode, function( data ) {
 				flash( data );
 				select( 'item', data.barcode );
 			} );
 			break;
 		case 'Lost':
-			lost( barcode, function( data ) {
+			API.lost( barcode, function( data ) {
 				flash( data );
 				select( 'item', data.barcode );
 			} );
@@ -374,19 +310,9 @@ function handleItemButtons() {
 
 function handleOverride() {
 	if ( last_item ) {
-		issue( last_item.item, last_item.user, true, handleItemIssue );
+		API.issue( last_item.item, last_item.user, true, handleItemIssue );
 		jQuery( this ).parent().remove()
 	}
-}
-
-function handlePrintButton() {
-	var clicked = jQuery( this ).closest( '.card' );
-	var type = jQuery( clicked ).data( 'type' );
-	var barcode = jQuery( clicked ).data( 'barcode' );
-
-	label( barcode, function ( data ) {
-		flash( data );
-	} );
 }
 
 function handleResultClick() {
@@ -398,7 +324,7 @@ function handleResultClick() {
 }
 
 function handlePanelClick() {
-	var clicked = jQuery( this ).closest( '.card' );
+  var clicked = jQuery( this ).closest( '.card' );
 	select( clicked.data( 'type' ), clicked.data( 'barcode' ) );
 }
 
@@ -439,7 +365,7 @@ function handleAuditSubmit( e ) {
 		var override = false;
 		if ( mode == 3 ) override = true;
 		if ( mode == 1 ) location = null;
-		audit( term, location, override, function( data ) {
+		API.audit( term, location, override, function( data ) {
 			if ( data.status == 'success' ) auditSuccessSound.play();
 			if ( data.status == 'danger' ) auditErrorSound.play();
 			flash( data );
@@ -453,7 +379,7 @@ function handleLabelSubmit( e ) {
 	var term = jQuery( '#label input' ).val();
 	jQuery( '#label input' ).val('');
 
-	label( term, function( data ) {
+	API.label( term, function( data ) {
 		flash( data );
 	} );
 }
@@ -467,7 +393,7 @@ function handleUserSubmit( e ) {
 	var course = jQuery( '#new-user form [name="course"]' ).val();
 	var year = jQuery( '#new-user form [name="year"]' ).val();
 
-	newUser( name, barcode, email, course, year, function( data ) {
+	API.newUser( name, barcode, email, course, year, function( data ) {
 		if ( data.status == 'success' ) {
 			select( data.redirect.type, data.redirect.barcode );
 			jQuery( 'a.issue' ).tab( 'show' );
