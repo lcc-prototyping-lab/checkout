@@ -1,2 +1,61 @@
-#reservation.tab-pane
-	+messageBlock('secondary', 'white', 'This feature is coming soon.')
+#reservation.tab-pane.active
+	.row
+		.col-md-3
+			.row
+				.col-12
+					.card.mb-3
+						.card-body
+							form
+								.input-group
+									.input-group-prepend
+										.input-group-text
+											span.fas.fa-qrcode
+									input( type="text", name="barcode", required, autocomplete="off" ).form-control#barcode
+				.col-12
+					ul.nav.nav-tabs
+						li.nav-item.users: a.nav-link.active( href="#users" data-toggle="tab" ): span.fas.fa-user
+						li.nav-item.items: a.nav-link( href="#items" data-toggle="tab" ): span.fas.fa-box
+					.tab-content
+						.tab-pane.active
+							.tab-pane.active
+								ul.list-group
+									li.list-group-item
+										small
+											strong Jonny Appleseed
+												br
+											| JAPPLESEED123
+									li.list-group-item
+										small
+											strong Jonny Appleseed
+												br
+											| JAPPLESEED123
+						#items.tab-pane
+							ul.list-group.list-group-hover
+		.col-md-9
+			.row
+				.col-12
+					.card.mb-3
+						.card-body
+							.row
+								.form-group.col-md-3.mb-0
+									label().font-weight-bold Start
+									input(type='datetime-local').form-control
+								.form-group.col-md-3.mb-0
+									label().font-weight-bold End
+									input(type='datetime-local').form-control
+								.form-group.col-md-3.mb-0
+									label().font-weight-bold Kind
+									select.form-control
+										option Reservation
+										option Maintenance
+								.form-group.col-md-3.mb-0
+									label().font-weight-bold Owner
+									input(disabled value="Jonny Appleseed").form-control
+									input(hidden value=1)
+				.col-12
+					+messageBlock('dark','white','Scan or search for item to populate reservation basket.')
+	.row
+		.col-12
+			.card.mt-3
+				.card-body.text-right
+					button.btn.btn-primary Reserve

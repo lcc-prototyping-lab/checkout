@@ -229,7 +229,8 @@ function apiGET( method, barcode, cb ) {
 }
 function getHistory() {
 	jQuery.get( '/api/history', function( data, status ) {
-		jQuery( '#history .items' ).html( data.actions );
+    if ( data.actions )
+  		jQuery( '#history .items' ).html( data.actions );
 	} );
 }
 
